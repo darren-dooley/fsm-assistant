@@ -9,10 +9,6 @@ saved without a Backtest.
 Product spec in [spec.md](spec.md), domain vocabulary in
 [CONTEXT.md](CONTEXT.md), decision records in `docs/adr/`.
 
-## Demo
-
-https://github.com/user-attachments/assets/23f30399-c0c2-438c-a61c-dfb783d9d31d
-
 ## Quick start
 
 Prerequisites: [uv](https://docs.astral.sh/uv/) and Node 20+. The provided
@@ -85,64 +81,27 @@ frontend/src/
 cd backend && uv run pytest   # 104 tests, offline, no key needed
 ```
 
-The suite drives the HTTP API in-process with a scripted fake LLM.
+* The suite drives the HTTP API in-process with a scripted fake LLM.
 
-## Evaluation
 
-### Offline (built)
+## Evals
 
-Both suites drive the real LLM through the same in-process HTTP seam the
-tests and product use, score by execution results (never SQL strings), and
-write rate reports to `backend/var/evals/*.json`. The golden set (P0) replays
-14 questions through the propose-then-run path against answers derived from
-known-good SQL; rule quality (P1) replays 12 known patterns through the run
-turn's drafter and backtests each clause on a fixture with hand-computed
-counts.
+Eval suites drive the real LLM. Two tiers of evals:
 
-```sh
-cd backend
-OPENAI_API_KEY=sk-... uv run fsm-eval                    # NL→SQL golden set
-OPENAI_API_KEY=sk-... uv run fsm-eval golden --runs 10   # flake measurement
-OPENAI_API_KEY=sk-... uv run fsm-eval rules              # rule quality
-```
+1. A golden set of evals replays 14 questions through the propose-then-run path against answers derived from
+known-good SQL.
+2. Second set evaluates rule quality, by replaying 12 known patterns through the run
+turn's drafter and backtests each clause on a fixture with hand-computed counts.
 
-Latest (gpt-4o-mini):
-
-- **Golden set** (10 runs): 97.3% mean execution match (min 90.9%); 100%
-  refusal on unanswerable questions, 0 false refusals; 0.9% shape-violation
-  rate (label-join lints); mean repair depth 1.1.
-- **Rule quality**: 0% false declines, the headline metric (ADR-0007); 8/8
-  metric patterns match hand-computed counts; 4/4 structural patterns
-  correctly decline; draft repair depth 1.0.
-
-### Online (designed, unbuilt)
-
-How we would prove effectiveness and safety in production:
-
-- **Drift monitoring**: weekly live precision per saved Rule vs its Backtest
-  snapshot; alert when materially below (the P2 Monitoring tab, with post-T
-  standing in for live traffic).
-- **Shadow mode**: new Rules tag but don't block until live precision
-  supports enforcement.
-- **Product metrics**: time from first question to saved Rule; share of
-  drafts that survive Backtest.
-- **Safety metrics**: guardrail rejection rate, repair depth distribution,
-  refusal rate.
-
-### Model yardstick (designed, unbuilt)
-
-A seeded LightGBM classifier trained on pre-T labels, reported only in the
-eval suite beside the rule set's aggregate detection (PR-AUC, recall at fixed
-false-positive budgets on the post-T holdout); no product surface (ADR-0001).
 
 ## Not built (P2 outlines)
 
 - **Monitoring tab** (ADR-0004): weekly post-T replay per saved Rule against
   its snapshot, Drift flagged; the tab renders disabled in the UI.
-- **LightGBM yardstick** (ADR-0001): above.
+- **LightGBM yardstick** A seeded LightGBM classifier trained on pre-T labels.
 - **Workbench polish**: instant clause preview while typing (debounced
-  COUNT-shaped query) and Score presentation polish; today backtesting is an
-  explicit action, which also keeps the FSM-drives-the-loop invariant.
+  COUNT-shaped query) and Score presentation polish.
+
 
 ## Design decisions
 
