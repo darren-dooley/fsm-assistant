@@ -1,0 +1,17 @@
+# SQLite transient WAL files
+data/*.db-shm
+data/*.db-wal
+
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+
+# App-owned databases (state + derived label cache)
+backend/var/
+
+# Node
+node_modules/
+frontend/dist/
+
+.env

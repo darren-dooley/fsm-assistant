@@ -1,0 +1,544 @@
+/* Palette and layout follow the design wireframes (README.html §4.1). */
+:root {
+  --paper: #f6f7fa;
+  --card: #ffffff;
+  --wash: #edf0f6;
+  --ink: #1b2430;
+  --muted: #5b6577;
+  --line: #d9dee8;
+  --line-strong: #aeb8c9;
+  --accent: #2553c4;
+  --accent-soft: #e4eaf9;
+  --accent-ink: #ffffff;
+  --amber: #9a6200;
+  --amber-bg: #fbf3e2;
+  --slab: #171c26;
+  --slab-ink: #9ae6b4;
+  --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #12161f;
+    --card: #1a202c;
+    --wash: #212938;
+    --ink: #e6e9f0;
+    --muted: #96a0b4;
+    --line: #2a3242;
+    --line-strong: #46536b;
+    --accent: #85a7f0;
+    --accent-soft: #23304b;
+    --accent-ink: #0f1524;
+    --amber: #e0a64f;
+    --amber-bg: #2c2414;
+    --slab: #0d1118;
+    --slab-ink: #8ed8a8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px;
+}
+
+.masthead {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 14px 2px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.masthead-title {
+  font-weight: 650;
+  font-size: 16px;
+}
+.masthead-note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.tab {
+  padding: 9px 12px;
+  border: none;
+  background: none;
+  border-bottom: 2.5px solid transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.tab.off:not(.disabled):hover {
+  color: var(--ink);
+}
+.tab.on {
+  color: var(--ink);
+  font-weight: 650;
+  border-bottom-color: var(--accent);
+}
+.tab.disabled {
+  cursor: default;
+}
+.tab.off small {
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+/* Panes stay mounted; display:contents lets the active pane's <main>/<form>
+   flex as direct children of .app. */
+.pane {
+  display: contents;
+}
+.pane[hidden] {
+  display: none;
+}
+
+.thread {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 2px;
+}
+.dataset-facts {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 4px;
+  max-width: 62ch;
+}
+
+.user-msg {
+  align-self: flex-end;
+  background: var(--accent-soft);
+  border-radius: 12px 12px 3px 12px;
+  padding: 8px 12px;
+  max-width: 75%;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--card);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  max-width: 92%;
+}
+.card.pending {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* The prose reply is the assistant's commentary; a proposed SQL block and,
+   once run, the result table below it are the data-grounded evidence
+   (story 28). */
+.commentary {
+  margin: 0;
+}
+
+/* The Run button under a proposed query */
+.run-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.run-actions button {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.run-actions button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.sql-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 12.5px;
+  user-select: none;
+}
+.sql {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  background: var(--slab);
+  color: var(--slab-ink);
+  border-radius: 5px;
+  padding: 9px 11px;
+  overflow-x: auto;
+  line-height: 1.5;
+  margin: 8px 0 0;
+}
+
+.table-scroll {
+  overflow: auto;
+  max-height: 340px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+th,
+td {
+  text-align: left;
+  padding: 5px 9px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+th {
+  background: var(--wash);
+  color: var(--muted);
+  font-weight: 600;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+
+.fine-print {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.error-card {
+  background: var(--amber-bg);
+  border-color: var(--amber);
+}
+.refusal-card .badge {
+  align-self: flex-start;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.ask {
+  display: flex;
+  gap: 8px;
+  padding: 12px 0 18px;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+.ask input {
+  flex: 1;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: var(--card);
+  color: var(--ink);
+}
+.ask button {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ask button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+code {
+  font-family: var(--mono);
+  font-size: 0.92em;
+  background: var(--wash);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+/* Explore "Create a Rule" handoff */
+.answer-actions {
+  margin-top: 2px;
+}
+.btn-link {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Rule Workbench */
+.wb {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0 8px;
+}
+.wb-empty {
+  color: var(--muted);
+}
+.wb-provenance {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+}
+.wb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wb-label {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--muted);
+}
+.wb-label small {
+  font-weight: 400;
+}
+.wb-field input,
+.wb-field textarea {
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 8px 11px;
+  font-size: 14px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  resize: vertical;
+}
+.wb-where {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.wb-sect {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  margin-top: 2px;
+}
+.wb-backtest-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.wb-stale {
+  font-size: 12px;
+  color: var(--amber);
+}
+.wb-message {
+  margin: 0;
+}
+
+/* Shared button style for the workbench and rule cards */
+.wb button,
+.wf-actions button {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.wb button:disabled,
+.wf-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.wf-actions button {
+  border-color: var(--line-strong);
+  background: var(--card);
+  color: var(--ink);
+  padding: 5px 12px;
+}
+
+.wb-save {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.wb-primary {
+  padding: 9px 18px !important;
+  font-size: 14px !important;
+}
+.wb-gate {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Backtest evidence panel */
+.evidence {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--card);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.evidence-top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.score {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: baseline;
+  min-width: 150px;
+}
+.score-num {
+  grid-row: 1 / 3;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.score.compact .score-num {
+  font-size: 28px;
+}
+.score-den {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.score-band {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--accent);
+}
+.score-bar {
+  grid-column: 2;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--wash);
+  overflow: hidden;
+  align-self: center;
+}
+.score-fill {
+  height: 100%;
+  background: var(--accent);
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(70px, 1fr));
+  gap: 8px;
+  flex: 1;
+}
+.tile {
+  background: var(--wash);
+  border-radius: 5px;
+  padding: 6px 9px;
+}
+.tile-val {
+  font-size: 17px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.tile-cap {
+  font-size: 11px;
+  color: var(--muted);
+}
+.tradeoff {
+  margin: 0;
+  font-size: 13.5px;
+}
+.evidence-basis {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* Rules tab */
+.wb-rule-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+.wf-card {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--card);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wf-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.wf-card-title {
+  font-weight: 650;
+  font-size: 15px;
+}
+.wf-evidence {
+  font-size: 12px;
+  color: var(--muted);
+}
+.wb-where.small {
+  font-size: 11px;
+  background: var(--slab);
+  color: var(--slab-ink);
+  border-radius: 5px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.wf-actions {
+  display: flex;
+  gap: 8px;
+}
