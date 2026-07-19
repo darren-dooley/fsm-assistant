@@ -35,8 +35,6 @@ One date T splits the dataset (ADR-0004), shared by everything:
 
 ![Dataset cutoff: pre-T visible for exploring and authoring, post-T sealed for monitoring and evals](docs/assets/cutoff.svg)
 
-A rule is authored and backtested on the same pre-T slice, so its Backtest is
-optimistic by construction; the UI says so, and post-T is the honest measure.
 
 ## Folder structure
 
