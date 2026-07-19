@@ -9,6 +9,10 @@ saved without a Backtest.
 Product spec in [spec.md](spec.md), domain vocabulary in
 [CONTEXT.md](CONTEXT.md), decision records in `docs/adr/`.
 
+## Demo
+
+https://github.com/user-attachments/assets/23f30399-c0c2-438c-a61c-dfb783d9d31d
+
 ## Quick start
 
 Prerequisites: [uv](https://docs.astral.sh/uv/) and Node 20+. The provided
