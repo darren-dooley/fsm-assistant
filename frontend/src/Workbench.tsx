@@ -147,8 +147,8 @@ export default function Workbench({ handoff, handoffKey, backendDown, onSaved }:
             disabled={backendDown}
           />
         </label>
-
         <div className="wb-sect">Backtest Results</div>
+
         <div className="wb-backtest-row">
           <button
             type="button"

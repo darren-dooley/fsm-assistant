@@ -29,11 +29,11 @@ Optional env: `OPENAI_MODEL` (default `gpt-5-nano`), `FSM_PORT` (default
 
 ## Architecture
 
-![Architecture: React UI over a FastAPI backend with guarded SQL execution](docs/architecture.svg)
+![Architecture: React UI over a FastAPI backend with guarded SQL execution](docs/assets/architecture.svg)
 
 One date T splits the dataset (ADR-0004), shared by everything:
 
-![Dataset cutoff: pre-T visible for exploring and authoring, post-T sealed for monitoring and evals](docs/cutoff.svg)
+![Dataset cutoff: pre-T visible for exploring and authoring, post-T sealed for monitoring and evals](docs/assets/cutoff.svg)
 
 A rule is authored and backtested on the same pre-T slice, so its Backtest is
 optimistic by construction; the UI says so, and post-T is the honest measure.
