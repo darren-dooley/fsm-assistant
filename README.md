@@ -29,43 +29,11 @@ Optional env: `OPENAI_MODEL` (default `gpt-5-nano`), `FSM_PORT` (default
 
 ## Architecture
 
-```
-┌────────────────────────────── React UI ───────────────────────────────┐
-│  Explore            Rule Workbench          Rules        Monitoring   │
-│  chat · NL→SQL      edit · backtest · save  saved set    P2 · unbuilt │
-│  propose + Run      (LLM-free)              + evidence   (disabled)   │
-└───────────────────────────────────┬───────────────────────────────────┘
-                                    │ JSON /api
-┌───────────────────────────────────▼───────────────────────────────────┐
-│ FastAPI · create_app(settings, llm_client)                            │
-│   POST /explore        converse; propose SQL (validated, never run)   │
-│   POST /explore/run    execute · grounded summary · draft / decline   │
-│   POST /rules/backtest deterministic metrics + Score, no LLM          │
-│   /rules CRUD          save gate: backtest of the exact clause        │
-├───────────────────────────────────────────────────────────────────────┤
-│ Translator            SummaryDrafter          BacktestEngine          │
-│ chat · repair ≤3      run turn: summary +     labeled-only metrics    │
-│                       rule draft or decline   + Score     RuleStore   │
-├───────────────────────────────────────────────────────────────────────┤
-│ GuardedExecutor: read-only authorizer · pre-cutoff temp views ·       │
-│ row cap · timeout        LLMClient (Protocol): OpenAI client or fake  │
-├───────────────────────────────────────────────────────────────────────┤
-│ data.db (provided · opened mode=ro)   cache.db + app.db (app-owned)   │
-└───────────────────────────────────────────────────────────────────────┘
-```
-
-The FSM drives every step: the assistant proposes a validated query, the
-explicit **Run** button executes it, the run's summary turn drafts a
-Candidate Rule (or states a structural decline), and the Workbench backtests
-and saves with no LLM involved.
+![Architecture: React UI over a FastAPI backend with guarded SQL execution](docs/architecture.svg)
 
 One date T splits the dataset (ADR-0004), shared by everything:
 
-```
-──────────── pre-T · visible (~80%) ────────────┬────── post-T · sealed ──────
- explore · backtests · rule authoring           │ Monitoring (P2) · eval
-                                 T = 2019-09-01 │ holdout
-```
+![Dataset cutoff: pre-T visible for exploring and authoring, post-T sealed for monitoring and evals](docs/cutoff.svg)
 
 A rule is authored and backtested on the same pre-T slice, so its Backtest is
 optimistic by construction; the UI says so, and post-T is the honest measure.
@@ -95,24 +63,17 @@ frontend/src/
 
 ## GenAI risk stance
 
-- The LLM produces SQL or prose about SQL, never data. Every figure shown is
-  the result of executing a real query.
-- Guardrails are application-enforced, not prompt-enforced: a SQLite
-  authorizer permits reading only (no writes, DDL, PRAGMA, ATTACH), one
-  statement per question, hard row cap, hard timeout, and temp views that
-  seal the post-cutoff slice even against qualified table names.
-- Proposed SQL is always displayed and executes only on an explicit click;
-  results render beside the query that produced them.
-- Invalid SQL is repaired by feeding the error back to the model, at most 3
-  attempts, every attempt re-guarded. Unanswerable questions are declined,
-  and the evals measure the refusal rate.
-- A rule draft translates the segment the FSM's query names; it never judges
-  risk (ADR-0007). The deterministic Backtest is the verdict, and nothing is
-  saved without one.
-- Rules cannot read `fraud_labels` (production traffic is unlabeled),
-  enforced by clause validation, not the prompt.
-- No autonomous agent: the model never chooses actions; the bounded repair
-  loop is the only iteration.
+- The LLM writes SQL or prose about SQL, never data; every figure on screen
+  comes from executing a real query.
+- Guardrails are code, not prompt: read-only SQLite authorizer, one statement
+  per question, row cap, timeout, sealed post-cutoff views.
+- Proposed SQL is always shown and runs only on an explicit click.
+- Bounded repair: at most 3 attempts, each re-guarded; unanswerable questions
+  are declined, and the evals track the refusal rate.
+- Drafts translate the query's segment, never judge risk (ADR-0007); the
+  deterministic Backtest is the verdict and gates saving.
+- Rules cannot read `fraud_labels`, enforced by clause validation.
+- No autonomous agent: the bounded repair loop is the only iteration.
 
 ## Tests
 
@@ -120,10 +81,7 @@ frontend/src/
 cd backend && uv run pytest   # 104 tests, offline, no key needed
 ```
 
-The suite drives the HTTP API in-process with a scripted fake LLM. Guardrail
-behavior (SELECT-only, row cap, timeout, sealed holdout, the save gate) is
-asserted at the same seam; backtest tests use a fixture database whose
-expected metrics are hand-computable arithmetic.
+The suite drives the HTTP API in-process with a scripted fake LLM.
 
 ## Evaluation
 
@@ -131,8 +89,11 @@ expected metrics are hand-computable arithmetic.
 
 Both suites drive the real LLM through the same in-process HTTP seam the
 tests and product use, score by execution results (never SQL strings), and
-write a metrics report to `backend/var/evals/*.json`: rates to track across
-versions, not pass/fail.
+write rate reports to `backend/var/evals/*.json`. The golden set (P0) replays
+14 questions through the propose-then-run path against answers derived from
+known-good SQL; rule quality (P1) replays 12 known patterns through the run
+turn's drafter and backtests each clause on a fixture with hand-computed
+counts.
 
 ```sh
 cd backend
@@ -141,45 +102,34 @@ OPENAI_API_KEY=sk-... uv run fsm-eval golden --runs 10   # flake measurement
 OPENAI_API_KEY=sk-... uv run fsm-eval rules              # rule quality
 ```
 
-**NL→SQL golden set** (P0): 14 questions replayed through the propose-then-run
-path. Expected answers are derived by running known-good SQL through the same
-guarded executor; deliberately unanswerable questions must be declined; shape
-lints catch the label-join mistakes result-matching can't name (a fraud rate
-diluted by unlabeled rows, a needless `fraud_labels` join). Latest
-(gpt-4o-mini, 10 runs): **97.3% mean execution match** (min 90.9%), **100%
-refusal on unanswerable questions, 0 false refusals**, 0.9% shape-violation
-rate, mean repair depth 1.1.
+Latest (gpt-4o-mini):
 
-**Rule quality** (P1): 12 known patterns replayed through the run turn's
-drafter, each drafted clause backtested on a fixture database with
-hand-computed expected counts, so any faithful phrasing lands on the same
-rows. The headline metric is the false-decline rate: a decline on a
-segment-naming query vetoes a hypothesis before the Backtest can test it
-(ADR-0007). Latest (gpt-4o-mini): **0% false declines**, **8/8 metric
-patterns match** the hand-computed counts, 4/4 structural patterns correctly
-decline, draft repair depth 1.0.
+- **Golden set** (10 runs): 97.3% mean execution match (min 90.9%); 100%
+  refusal on unanswerable questions, 0 false refusals; 0.9% shape-violation
+  rate (label-join lints); mean repair depth 1.1.
+- **Rule quality**: 0% false declines, the headline metric (ADR-0007); 8/8
+  metric patterns match hand-computed counts; 4/4 structural patterns
+  correctly decline; draft repair depth 1.0.
 
 ### Online (designed, unbuilt)
 
 How we would prove effectiveness and safety in production:
 
-- **Drift monitoring**: each saved Rule's live precision tracked weekly
-  against the Backtest snapshot it was saved with; alert when materially
-  below. The P2 Monitoring tab is its in-product expression, with the sealed
-  post-T slice standing in for live traffic.
+- **Drift monitoring**: weekly live precision per saved Rule vs its Backtest
+  snapshot; alert when materially below (the P2 Monitoring tab, with post-T
+  standing in for live traffic).
 - **Shadow mode**: new Rules tag but don't block until live precision
   supports enforcement.
-- **Product metrics**: FSM time from first question to saved Rule; share of
+- **Product metrics**: time from first question to saved Rule; share of
   drafts that survive Backtest.
-- **Safety metrics**: guardrail rejection rate, repair-loop depth
-  distribution, refusal rate on unanswerable questions.
+- **Safety metrics**: guardrail rejection rate, repair depth distribution,
+  refusal rate.
 
 ### Model yardstick (designed, unbuilt)
 
 A seeded LightGBM classifier trained on pre-T labels, reported only in the
-eval suite (PR-AUC, recall at fixed false-positive budgets on the post-T
-holdout) beside the rule set's aggregate detection: a yardstick for the Head
-of Fraud, with no product surface (ADR-0001).
+eval suite beside the rule set's aggregate detection (PR-AUC, recall at fixed
+false-positive budgets on the post-T holdout); no product surface (ADR-0001).
 
 ## Not built (P2 outlines)
 

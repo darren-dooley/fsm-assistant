@@ -13,10 +13,6 @@ export function pct(x: number, dp = 2): string {
   return `${(100 * x).toFixed(dp)}%`
 }
 
-export function liftLabel(lift: number): string {
-  return `${lift.toFixed(lift >= 10 ? 0 : 1)}×`
-}
-
 // The plain-English tradeoff (legitimate blocked per fraud caught), shown with
 // the Score, never in its place. Raw counts sit beside ratios because
 // percentages mislead at a ~0.17% base rate.
@@ -31,9 +27,4 @@ export function tradeoffSentence(b: Backtest): string {
   const rounded = Math.round(per)
   const plural = rounded === 1 ? 'payment' : 'payments'
   return `Add this rule if you are willing to block about ${rounded} legitimate ${plural} for every 1 fraud it catches.`
-}
-
-// A one-line evidence summary for the Rules tab cards.
-export function evidenceLine(b: Backtest): string {
-  return `${pct(b.precision)} precision · ${pct(b.recall)} of known fraud · ${liftLabel(b.lift)} lift`
 }

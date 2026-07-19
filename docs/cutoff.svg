@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 132" role="img" aria-label="One cutoff date T = 2019-09-01 splits the dataset: pre-T visible for exploring and rule authoring, post-T sealed for monitoring and evals">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; font-size: 11px; }
+    .t { fill: #1f2328; font-weight: 600; font-size: 12px; }
+    .s { fill: #59636e; }
+    .m { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+    .code { fill: #0550ae; }
+    .pre { fill: #ddf4ff; stroke: #54aeff; }
+    .post { fill: #f6f8fa; stroke: #d0d7de; }
+    .hl { stroke: #d0d7de; }
+    .al { stroke: #0969da; }
+    @media (prefers-color-scheme: dark) {
+      .t { fill: #e6edf3; }
+      .s { fill: #9198a1; }
+      .code { fill: #79c0ff; }
+      .pre { fill: #132339; stroke: #1f6feb; }
+      .post { fill: #161b22; stroke: #3d444d; }
+      .hl { stroke: #30363d; }
+      .al { stroke: #58a6ff; }
+    }
+  </style>
+  <defs>
+    <pattern id="sealed" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="8" class="hl" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect x="30" y="28" width="542" height="48" class="pre"/>
+  <text x="301" y="50" text-anchor="middle" class="t">pre-T · visible (~80%)</text>
+  <text x="301" y="67" text-anchor="middle" class="s">explore · backtests · rule authoring</text>
+
+  <rect x="572" y="28" width="278" height="48" class="post"/>
+  <rect x="572" y="28" width="278" height="48" fill="url(#sealed)" opacity="0.5"/>
+  <text x="711" y="50" text-anchor="middle" class="t">post-T · sealed</text>
+  <text x="711" y="67" text-anchor="middle" class="s">Monitoring (P2) · eval holdout</text>
+
+  <line x1="572" y1="16" x2="572" y2="88" class="al" stroke-width="2"/>
+  <text x="572" y="110" text-anchor="middle" class="m code">T = 2019-09-01</text>
+</svg>

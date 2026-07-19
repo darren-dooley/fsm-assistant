@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import type { Rule } from './api'
 import { deleteRule, listRules, rebacktestRule } from './api'
 import { ScoreBand } from './evidence'
-import { evidenceLine } from './score'
 
 interface RulesProps {
   active: boolean
@@ -94,7 +93,6 @@ export default function Rules({ active, refreshKey, backendDown, onEdit }: Rules
           </div>
           <pre className="wb-where small">{rule.clause}</pre>
           {rule.description && <p className="fine-print">{rule.description}</p>}
-          <p className="wf-evidence">{evidenceLine(rule.backtest)}</p>
           <div className="wf-actions">
             <button type="button" onClick={() => rebacktest(rule.id)} disabled={busyId === rule.id || backendDown}>
               {busyId === rule.id ? '…' : 'Re-backtest'}

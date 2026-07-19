@@ -47,7 +47,6 @@ export default function App() {
     <div className="app">
       <header className="masthead">
         <span className="masthead-title">FSM Assistant</span>
-        <span className="masthead-note">explore · draft · backtest · save — pre-cutoff data only</span>
       </header>
       <nav className="tabs">
         {TABS.map((name) => (

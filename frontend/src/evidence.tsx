@@ -1,5 +1,5 @@
 import type { Backtest } from './api'
-import { pct, scoreBand, tradeoffSentence, liftLabel } from './score'
+import { pct, scoreBand, tradeoffSentence } from './score'
 
 export function ScoreBand({ score, compact = false }: { score: number; compact?: boolean }) {
   const rounded = Math.round(score)
@@ -23,9 +23,6 @@ export function EvidencePanel({ backtest }: { backtest: Backtest }) {
     [b.fraud_caught.toLocaleString(), 'fraud caught'],
     [b.legit_blocked.toLocaleString(), 'legit blocked'],
     [pct(b.precision), 'precision'],
-    [pct(b.recall), 'of known fraud'],
-    [liftLabel(b.lift), 'lift vs base'],
-    [b.flagged_unlabeled.toLocaleString(), 'flagged, unlabeled'],
   ]
   return (
     <div className="evidence">
@@ -41,12 +38,6 @@ export function EvidencePanel({ backtest }: { backtest: Backtest }) {
         </div>
       </div>
       <p className="tradeoff">{tradeoffSentence(b)}</p>
-      <p className="evidence-basis">
-        {b.evidence_basis} evidence — optimistic by construction · metrics over{' '}
-        {b.flagged_labeled.toLocaleString()} labeled of{' '}
-        {b.flagged_total.toLocaleString()} flagged ({b.flagged_unlabeled.toLocaleString()} unlabeled
-        excluded) · base rate {pct(b.base_rate, 3)}
-      </p>
     </div>
   )
 }

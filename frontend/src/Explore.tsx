@@ -134,14 +134,6 @@ export default function Explore({ meta, backendDown, onCreateRule }: ExploreProp
   return (
     <>
       <main className="thread">
-        {meta && (
-          <p className="dataset-facts">
-            {meta.transactions.toLocaleString()} transactions before {meta.cutoff} ·{' '}
-            {meta.label_coverage_pct}% carry a fraud label · base fraud rate{' '}
-            <b>{meta.base_fraud_rate_pct}%</b> of labeled transactions. Chat about the data in
-            plain English; when the assistant proposes a query, you decide whether to run it.
-          </p>
-        )}
         {backendDown && (
           <div className="card error-card">
             The assistant backend could not be reached. Start it with{' '}

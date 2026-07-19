@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 542" role="img" aria-label="Architecture: React UI over a FastAPI backend with guarded SQL execution">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; font-size: 11px; }
+    .t { fill: #1f2328; font-weight: 600; font-size: 12.5px; }
+    .h { fill: #1f2328; font-weight: 600; font-size: 13px; }
+    .s { fill: #59636e; }
+    .m { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+    .code { fill: #0550ae; }
+    .bg { fill: #f6f8fa; stroke: #d0d7de; }
+    .card { fill: #ffffff; stroke: #d0d7de; }
+    .div { stroke: #d0d7de; }
+    .al { stroke: #0969da; }
+    .af { fill: #0969da; }
+    .dis { stroke-dasharray: 4 3; }
+    @media (prefers-color-scheme: dark) {
+      .t, .h { fill: #e6edf3; }
+      .s { fill: #9198a1; }
+      .code { fill: #79c0ff; }
+      .bg { fill: #161b22; stroke: #3d444d; }
+      .card { fill: #0d1117; stroke: #3d444d; }
+      .div { stroke: #3d444d; }
+      .al { stroke: #58a6ff; }
+      .af { fill: #58a6ff; }
+    }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" class="af"/>
+    </marker>
+  </defs>
+
+  <!-- React UI -->
+  <rect x="16" y="16" width="848" height="116" rx="8" class="bg"/>
+  <text x="440" y="40" text-anchor="middle" class="h">React UI</text>
+
+  <rect x="30" y="54" width="196" height="64" rx="6" class="card"/>
+  <text x="128" y="76" text-anchor="middle" class="t">Explore</text>
+  <text x="128" y="94" text-anchor="middle" class="s">chat · NL→SQL</text>
+  <text x="128" y="110" text-anchor="middle" class="s">propose + Run</text>
+
+  <rect x="238" y="54" width="196" height="64" rx="6" class="card"/>
+  <text x="336" y="76" text-anchor="middle" class="t">Rule Workbench</text>
+  <text x="336" y="94" text-anchor="middle" class="s">edit · backtest · save</text>
+  <text x="336" y="110" text-anchor="middle" class="s">LLM-free</text>
+
+  <rect x="446" y="54" width="196" height="64" rx="6" class="card"/>
+  <text x="544" y="76" text-anchor="middle" class="t">Rules</text>
+  <text x="544" y="94" text-anchor="middle" class="s">saved set</text>
+  <text x="544" y="110" text-anchor="middle" class="s">+ evidence</text>
+
+  <g opacity="0.7">
+    <rect x="654" y="54" width="196" height="64" rx="6" class="card dis"/>
+    <text x="752" y="76" text-anchor="middle" class="t">Monitoring</text>
+    <text x="752" y="94" text-anchor="middle" class="s">P2 · unbuilt</text>
+    <text x="752" y="110" text-anchor="middle" class="s">(disabled)</text>
+  </g>
+
+  <!-- UI → API -->
+  <line x1="440" y1="132" x2="440" y2="162" class="al" stroke-width="1.5" marker-end="url(#ah)"/>
+  <text x="452" y="152" class="m code">JSON /api</text>
+
+  <!-- Backend -->
+  <rect x="16" y="170" width="848" height="356" rx="8" class="bg"/>
+
+  <!-- FastAPI endpoints -->
+  <text x="32" y="198" class="h">FastAPI · <tspan class="m">create_app(settings, llm_client)</tspan></text>
+  <text x="32" y="224" class="m code">POST /explore</text>
+  <text x="230" y="224" class="s">converse; propose SQL (validated, never run)</text>
+  <text x="32" y="247" class="m code">POST /explore/run</text>
+  <text x="230" y="247" class="s">execute · grounded summary · draft / decline</text>
+  <text x="32" y="270" class="m code">POST /rules/backtest</text>
+  <text x="230" y="270" class="s">deterministic metrics + Score, no LLM</text>
+  <text x="32" y="293" class="m code">/rules CRUD</text>
+  <text x="230" y="293" class="s">save gate: backtest of the exact clause</text>
+
+  <line x1="16" y1="306" x2="864" y2="306" class="div"/>
+
+  <!-- Components -->
+  <rect x="30" y="320" width="180" height="54" rx="6" class="card"/>
+  <text x="120" y="342" text-anchor="middle" class="t">Translator</text>
+  <text x="120" y="360" text-anchor="middle" class="s">chat · repair ≤3</text>
+
+  <rect x="222" y="320" width="260" height="54" rx="6" class="card"/>
+  <text x="352" y="342" text-anchor="middle" class="t">SummaryDrafter</text>
+  <text x="352" y="360" text-anchor="middle" class="s">run turn: summary + rule draft / decline</text>
+
+  <rect x="494" y="320" width="220" height="54" rx="6" class="card"/>
+  <text x="604" y="342" text-anchor="middle" class="t">BacktestEngine</text>
+  <text x="604" y="360" text-anchor="middle" class="s">labeled-only metrics + Score</text>
+
+  <rect x="726" y="320" width="124" height="54" rx="6" class="card"/>
+  <text x="788" y="342" text-anchor="middle" class="t">RuleStore</text>
+  <text x="788" y="360" text-anchor="middle" class="s">saved rule set</text>
+
+  <line x1="16" y1="388" x2="864" y2="388" class="div"/>
+
+  <!-- Guarded execution -->
+  <rect x="30" y="402" width="520" height="44" rx="6" class="card"/>
+  <text x="290" y="419" text-anchor="middle" class="t">GuardedExecutor</text>
+  <text x="290" y="436" text-anchor="middle" class="s">read-only authorizer · pre-cutoff temp views · row cap · timeout</text>
+
+  <rect x="562" y="402" width="288" height="44" rx="6" class="card"/>
+  <text x="706" y="419" text-anchor="middle" class="t">LLMClient (Protocol)</text>
+  <text x="706" y="436" text-anchor="middle" class="s">OpenAI client or fake</text>
+
+  <line x1="16" y1="460" x2="864" y2="460" class="div"/>
+
+  <!-- Data -->
+  <rect x="30" y="474" width="400" height="36" rx="6" class="card"/>
+  <text x="230" y="496" text-anchor="middle"><tspan class="m code">data.db</tspan><tspan class="s"> · provided · opened mode=ro</tspan></text>
+
+  <rect x="442" y="474" width="408" height="36" rx="6" class="card"/>
+  <text x="646" y="496" text-anchor="middle"><tspan class="m code">cache.db + app.db</tspan><tspan class="s"> · app-owned</tspan></text>
+</svg>
